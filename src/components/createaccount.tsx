@@ -133,6 +133,13 @@ const Createaccount: React.FC = () => {
     
                         setpotentiallocations(response)
                     })
+            } if (address !== ""){
+                await axios.get(`https://api.myptv.com/geocoding/v1/locations/by-text?searchText=${address}&apiKey=ZjVmOTA2NmQ5YTZkNDk0NWEzNDQzNTIxOWY0MTdlODc6ZTA5YzNjY2QtN2FjOC00NTA5LWE2NjgtYjA1NGE4Nzg1NGY1`)
+                    .then((r) => {
+                        let response: responsefromgeocodingapi[] = r.data.locations
+    
+                        setpotentiallocations(response)
+                    })
             }
             
         } catch (error) {
