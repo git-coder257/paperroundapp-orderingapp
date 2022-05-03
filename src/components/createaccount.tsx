@@ -140,6 +140,8 @@ const Createaccount: React.FC = () => {
     
                         setpotentiallocations(response)
                     })
+            } else if (address === ""){
+                seterror("you haven't entered your address")
             }
             
         } catch (error) {
