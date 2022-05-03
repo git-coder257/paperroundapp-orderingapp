@@ -42,6 +42,14 @@ interface quality {
 //     longitude: number
 // }
 
+interface infofornewordereruser {
+    username: string,
+    password: string,
+    locationlat: number | undefined,
+    locationlong: number | undefined,
+    postofficename: string,
+}
+
 interface responsefromgeocodingapi {
     address: address
     formattedAddress: string,
@@ -51,6 +59,10 @@ interface responsefromgeocodingapi {
     roadAccessPostion: {latitude: number, longitude: number}
     // referencePosition: geolocation,
     // roadAccessPostion: geolocation
+}
+
+interface responsefromnewordereruserreq {
+    data: {success: boolean}
 }
 
 const Createaccount: React.FC = () => {
@@ -98,17 +110,25 @@ const Createaccount: React.FC = () => {
         //         console.log(r.data)
         //     })
         try {
-            if (postofficename !== ""){
+            if (postofficename !== "" && address !== ""){
                 
-                let redBody = {
+                let req: infofornewordereruser = {
                     username: username,
                     password: password,
-                    postofficename: postofficename,
                     locationlat: location?.referencePosition.latitude,
                     locationlong: location?.referencePosition.longitude,
-                    location: address
+                    postofficename: postofficename,
                 }
-                
+
+                // await axios.post(`https://dry-shore-19751.herokuapp.com/newordereruser/${req.username}/${req.password}/${req.locationlat}/${req.locationlong}/${req.postofficename}`, {
+                await axios.post(`http://localhost:3000/newordereruser/${req.username}/${req.password}/${req.locationlat}/${req.locationlong}/${req.postofficename}`, {
+                    location: address
+                })
+                    .then((r: responsefromnewordereruserreq) => {
+                        if (!r.data.success){
+                            seterror("there has been a issue signing you in please try again")
+                        }
+                    })
             } else if (postofficename === "") {
                 
                 await axios.get(`http://localhost:3000/postofficename/${district}`)
@@ -179,6 +199,7 @@ const Createaccount: React.FC = () => {
                 {potentiallocation.address.province === "" ? potentiallocation.address.city : potentiallocation.address.province}
             </button>
         </div>)}
+        {error}
         <button onClick={handlecreateaccount}>Create account</button>
     </div>
 }

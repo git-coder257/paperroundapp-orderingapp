@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 
 const Home: React.FC = () => {
-    return <div></div>
+    return <div>
+        <h1>HOME</h1>
+    </div>
 }
 
 export default Home
