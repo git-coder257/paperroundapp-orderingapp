@@ -2,11 +2,17 @@ import axios from "axios";
 import React, { useState } from "react";
 
 interface inputevent {
-    target: {value: string}
+    target: {
+        value: string
+    }
 }
 
 interface responsefromordereruserreq {
-    data: {success: boolean, accountexists?: boolean}
+    data: {
+        success: boolean,
+        accountexists?: boolean,
+        postofficename: string
+    }
 }
 
 const Login: React.FC = () => {
@@ -24,14 +30,16 @@ const Login: React.FC = () => {
 
     const handlelogin = async () => {
 
-        console.log(`https://dry-shore-19751.herokuapp.com/ordereruser/${username}/${password}`)
+        // console.log(`https://dry-shore-19751.herokuapp.com/ordereruser/${username}/${password}`)
 
         await axios.get(`https://dry-shore-19751.herokuapp.com/ordereruser/${username}/${password}`)
             .then((r: responsefromordereruserreq) => {
                 if (r.data.success){
                     if (r.data.accountexists){
+
                         localStorage.setItem("username", username)
                         localStorage.setItem("password", password)
+                        localStorage.setItem("postofficename", r.data.postofficename)
 
                         window.location.href = window.location.origin + "/home"
                     }

@@ -127,6 +127,13 @@ const Createaccount: React.FC = () => {
                     .then((r: responsefromnewordereruserreq) => {
                         if (!r.data.success){
                             seterror("there has been a issue signing you in please try again")
+                        } else if (r.data.success){
+
+                            localStorage.setItem("username", username)
+                            localStorage.setItem("password", password)
+                            localStorage.setItem("postofficename", postofficename)
+
+                            window.location.href = window.location.origin + "/home"
                         }
                     })
             } else if (postofficename === "") {
