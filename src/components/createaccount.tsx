@@ -121,7 +121,7 @@ const Createaccount: React.FC = () => {
                 }
 
                 // await axios.post(`https://dry-shore-19751.herokuapp.com/newordereruser/${req.username}/${req.password}/${req.locationlat}/${req.locationlong}/${req.postofficename}`, {
-                await axios.post(`http://localhost:3000/newordereruser/${req.username}/${req.password}/${req.locationlat}/${req.locationlong}/${req.postofficename}`, {
+                await axios.post(`https://dry-shore-19751.herokuapp.com/newordereruser/${req.username}/${req.password}/${req.locationlat}/${req.locationlong}/${req.postofficename}`, {
                     location: address
                 })
                     .then((r: responsefromnewordereruserreq) => {
@@ -138,7 +138,7 @@ const Createaccount: React.FC = () => {
                     })
             } else if (postofficename === "") {
                 
-                await axios.get(`http://localhost:3000/postofficename/${district}`)
+                await axios.get(`https://dry-shore-19751.herokuapp.com/postofficename/${district}`)
                 .then((r) => {
                     // console.log(r.data)
                     if (r.data.success){

@@ -67,7 +67,7 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         // (async function() {
-        //     await axios.get(`http://localhost:3000/getallpapers/${username}/${password}`)
+        //     await axios.get(`https://dry-shore-19751.herokuapp.com/getallpapers/${username}/${password}`)
         //         .then((r: {data: {papers: orderedpapers[], success: boolean}}) => {
         //             console.log(r.data)
         //             setorderedpapers(r.data.papers)
@@ -96,7 +96,7 @@ const Home: React.FC = () => {
                 
         //     }
         // }
-        axios.post(`http://localhost:3000/addpaper/${username}/${password}/${papername}`, {
+        axios.post(`https://dry-shore-19751.herokuapp.com/addpaper/${username}/${password}/${papername}`, {
             days: days
         })
             .then((r: {data: {success: boolean}}) => {
@@ -112,7 +112,7 @@ const Home: React.FC = () => {
         
     const updatepaper = async () => {
         
-        await axios.get(`http://localhost:3000/getallpapers/${username}/${password}`)
+        await axios.get(`https://dry-shore-19751.herokuapp.com/getallpapers/${username}/${password}`)
             .then((r: {data: {papers: orderedpapers[], success: boolean}}) => {
                 console.log(r.data)
                 setorderedpapers(r.data.papers)
@@ -124,46 +124,19 @@ const Home: React.FC = () => {
     const handleupdatepapername = async (e: inputevent) => {
         setpapername(e.target.value)
 
-        // await axios.get(`http://localhost:3000/paperexist/${papername}/${localStorage.getItem("postofficename")}`)
-        //     .then((r) => {
-
-        //     })
-
-        
-        // if (typeof mondaydisabled === "boolean") setmondaydisabled(true)
-        // if (typeof setmondaydisabled === "function") setmondaydisabled(true)
-
         try {
-            await axios.get(`http://localhost:3000/getdaysforpaper/${e.target.value}/${localStorage.getItem("postofficename")}`)
+            await axios.get(`https://dry-shore-19751.herokuapp.com/getdaysforpaper/${e.target.value}/${localStorage.getItem("postofficename")}`)
                 .then((r) => {
-                    // if (r.data.days.length > 0){
-                        for (let i = 0; i < r.data.days.length; i++){
-                            // if (r.data.days[i].day === 'monday' && typeof mondaydisabled === "boolean" && typeof setmondaydisabled === "function"){
-                            //     setmondaydisabled(true)
-                            // } if (r.data.days[i].day === 'tuesday' && typeof tuesdaydisabled === "boolean" && typeof settuesdaydisabled === "function"){
-                            //     settuesdaydisabled(true)
-                            // } if (r.data.days[i].day === 'wednesday' && typeof wednesdaydisabled === "boolean" && typeof setwednesdaydisabled === "function"){
-                            //     setwednesdaydisabled(true)
-                            // } if (r.data.days[i].day === 'thursday' && typeof thursdaydisabled === "boolean" && typeof setthursdaydisabled === "function"){
-                            //     setthursdaydisabled(true)
-                            // } if (r.data.days[i].day === 'friday' && typeof fridaydisabled === "boolean" && typeof setfridaydisabled === "function"){
-                            //     setfridaydisabled(true)
-                            // } if (r.data.days[i].day === 'saturday' && typeof saturdaydisabled === "boolean" && typeof setsaturdaydisabled === "function"){
-                            //     setsaturdaydisabled(true)
-                            // } if (r.data.days[i].day === 'sunday' && typeof sundaydisabled === "boolean" && typeof setsundaydisabled === "function"){
-                            //     setsundaydisabled(true)
-                            // }  
+                    for (let i = 0; i < r.data.days.length; i++){
+                        console.log(r.data.days[i].day !== 'monday' && typeof mondaydisabled === "boolean" && typeof setmondaydisabled === "function")
 
-                            console.log(r.data.days[i].day !== 'monday' && typeof mondaydisabled === "boolean" && typeof setmondaydisabled === "function")
+                        updatedisabledoptionstrue(r.data.days[i])
 
-                            updatedisabledoptionstrue(r.data.days[i])
+                        updatedisabledoptionsfalse(r.data.days[i])
+                    }
+                    resetdisabledoptions()
 
-                            updatedisabledoptionsfalse(r.data.days[i])
-                        }
-
-                        resetdisabledoptions()
-
-                        console.log(r.data.days)
+                    console.log(r.data.days)
                 })
         } catch (error) {
             resetdisabledoptions()
