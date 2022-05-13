@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios'
 import "./home.css"
+import GetItem from "./getItem"
 
 interface inputevent {
     target: {value: string}
@@ -32,6 +33,16 @@ interface daystodeliver {
     sunday: boolean
 }
 
+interface dayindexes {
+    monday: number,
+    tuesday: number,
+    wednesday: number,
+    thursday: number,
+    friday: number,
+    saturday: number,
+    sunday: number    
+}
+
 interface day {
     monday: boolean | undefined,
     tuesday: boolean | undefined,
@@ -42,7 +53,13 @@ interface day {
     sunday: boolean | undefined
 }
 
-const useGetDayStates: () => (boolean | Function)[] = () => {
+interface dayspapercanbedelivered {
+    postoffice_id: number,
+    papername: string,
+    day: string,
+}
+
+const useGetDayStates: () => (any)[] = () => {
     
     let [monday, setmonday] = useState<boolean>(false)
     let [tuesday, settuesday] = useState<boolean>(false)
@@ -52,63 +69,76 @@ const useGetDayStates: () => (boolean | Function)[] = () => {
     let [saturday, setsaturday] = useState<boolean>(false)
     let [sunday, setsunday] = useState<boolean>(false)
  
-    return [monday, setmonday, tuesday, settuesday, wednesday, setwednesday, thursday, setthursday, friday, setfriday, saturday, setsaturday, sunday, setsunday]
+    return [[monday, setmonday, "monday"], [tuesday, settuesday, "tuesday"], [wednesday, setwednesday, "wednesday"],
+            [thursday, setthursday, "thursday"], [friday, setfriday, "friday"], [saturday, setsaturday, "saturday"],
+            [sunday, setsunday, "sunday"]]
 }
 
 const Home: React.FC = () => {
 
     let [showorderpaperdisplay, toggledisplay] = useState<boolean>(false)
+    let daystates = useGetDayStates()
+    let daystatesdisabled = useGetDayStates()
     let [papername, setpapername] = useState<string>("")
-    let [monday, setmonday, tuesday, settuesday, wednesday, setwednesday, thursday, setthursday, friday, setfriday, saturday, setsaturday, sunday, setsunday] = useGetDayStates()
-    let [mondaydisabled, setmondaydisabled, tuesdaydisabled, settuesdaydisabled, wednesdaydisabled, setwednesdaydisabled, thursdaydisabled, setthursdaydisabled, fridaydisabled, setfridaydisabled, saturdaydisabled, setsaturdaydisabled, sundaydisabled, setsundaydisabled] = useGetDayStates()
     let [username, setusername] = useState<string | null>(localStorage.getItem("username"))
     let [password, setpassword] = useState<string | null>(localStorage.getItem("password"))
     let [orderedpapers, setorderedpapers] = useState<orderedpapers[]>([])
+    let [dayspapercanbedelivered, setdayspapercanbedelivered] = useState<dayspapercanbedelivered[]>([])
 
     useEffect(() => {
-        // (async function() {
-        //     await axios.get(`https://dry-shore-19751.herokuapp.com/getallpapers/${username}/${password}`)
-        //         .then((r: {data: {papers: orderedpapers[], success: boolean}}) => {
-        //             console.log(r.data)
-        //             setorderedpapers(r.data.papers)
-        //         })
-        // })()
         (async function () {
             await updatepaper()
 
-            // toggledisplay(!showorderpaperdisplay)
+            await handlegetalldaysfromserver()
         })()
+
     }, [])
 
     const handleshoworderpaperdisplay = () => {
         toggledisplay(true)
     }
 
-    const handleorderpaper = () => {
-
-        let days = [{monday: monday}, {tuesday: tuesday}, {wednesday: wednesday}, {thursday: thursday}, {friday: friday}, {saturday: saturday}, {sunday: sunday}]
-
-        // for (let i = 0; i < daysrequest.length; i++){
-        //     if (typeof daysrequest[i] === "object"){
-        //         if (Object.entries(daysrequest)[0][1]){
-        //             days.push({key: true})
-        //         }
-                
-        //     }
-        // }
-        axios.post(`https://dry-shore-19751.herokuapp.com/addpaper/${username}/${password}/${papername}`, {
-            days: days
-        })
-            .then((r: {data: {success: boolean}}) => {
-                console.log(r.data)
+    const handlegetalldaysfromserver = async () => {
+        await axios.get(`http://localhost:3000/getalldays/${localStorage.getItem("postofficename")}`)
+            .then((r: {data: {days: dayspapercanbedelivered[], success: boolean}}) => {
+                // setdayspapercanbedelivered(r.data)
                 if (r.data.success){
-                    updatepaper()
+                    setdayspapercanbedelivered(r.data.days)
                 }
             })
     }
 
-    // async function() {
-        // }
+    const handleorderpaper = () => {
+
+        let days = [{monday: daystates[0][0]}, {tuesday: daystates[1][0]}, {wednesday: daystates[2][0]}, {thursday: daystates[3][0]}, {friday: daystates[4][0]}, {saturday: daystates[5][0]}, {sunday: daystates[6][0]}]
+
+        console.log(dayspapercanbedelivered)
+
+        let paperexists = false
+
+        for (let i = 0; i < dayspapercanbedelivered.length; i++){
+            if (dayspapercanbedelivered[i].papername === papername){
+                paperexists = true
+                break
+            }
+        }
+
+        console.log(days)
+
+        if (paperexists){
+            // axios.post(`https://dry-shore-19751.herokuapp.com/addpaper/${username}/${password}/${papername}`, {
+            //     days: days
+            // })
+            //     .then((r: {data: {success: boolean}}) => {
+            //         console.log(r.data)
+            //         if (r.data.success){
+            //             updatepaper()
+            //         }
+            //     })
+        } else if (!paperexists){
+            alert("There has been a error. Please try again.")
+        }
+    }
         
     const updatepaper = async () => {
         
@@ -119,27 +149,38 @@ const Home: React.FC = () => {
             })
     }
 
-    // const 
-
+    
     const handleupdatepapername = async (e: inputevent) => {
         setpapername(e.target.value)
+        
+        const dayindexes: any = {
+            monday: 0, 
+            tuesday: 1,
+            wednesday: 2,
+            thursday: 3,
+            friday: 4,
+            saturday: 5,
+            sunday: 7,
+        }
 
-        try {
-            await axios.get(`https://dry-shore-19751.herokuapp.com/getdaysforpaper/${e.target.value}/${localStorage.getItem("postofficename")}`)
-                .then((r) => {
-                    for (let i = 0; i < r.data.days.length; i++){
-                        console.log(r.data.days[i].day !== 'monday' && typeof mondaydisabled === "boolean" && typeof setmondaydisabled === "function")
+        console.log(dayspapercanbedelivered)
 
-                        updatedisabledoptionstrue(r.data.days[i])
+        if (daystatesdisabled[0][0]) daystatesdisabled[0][1](false)
+        if (daystatesdisabled[1][0]) daystatesdisabled[1][1](false)
+        if (daystatesdisabled[2][0]) daystatesdisabled[2][1](false)
+        if (daystatesdisabled[3][0]) daystatesdisabled[3][1](false)
+        if (daystatesdisabled[4][0]) daystatesdisabled[4][1](false)
+        if (daystatesdisabled[5][0]) daystatesdisabled[5][1](false)
+        if (daystatesdisabled[6][0]) daystatesdisabled[6][1](false)
 
-                        updatedisabledoptionsfalse(r.data.days[i])
-                    }
-                    resetdisabledoptions()
 
-                    console.log(r.data.days)
-                })
-        } catch (error) {
-            resetdisabledoptions()
+        for (let i = 0; i < dayspapercanbedelivered.length; i++){
+            if (dayspapercanbedelivered[i].papername === e.target.value){
+                console.log(dayspapercanbedelivered[i].day)
+                console.log(dayindexes[dayspapercanbedelivered[i].day])
+                console.log(daystatesdisabled[dayindexes[dayspapercanbedelivered[i].day]])
+                daystatesdisabled[dayindexes[dayspapercanbedelivered[i].day]][1](true)
+            }
         }
     }
 
@@ -149,76 +190,12 @@ const Home: React.FC = () => {
         }
     }
 
-    const resetdisabledoptions = () => {
-        if (typeof setmondaydisabled === "function" && mondaydisabled === true) setmondaydisabled(false)
-        if (typeof settuesdaydisabled === "function" && tuesdaydisabled === true) settuesdaydisabled(false)
-        if (typeof setwednesdaydisabled === "function" && wednesdaydisabled === true) setwednesdaydisabled(false)
-        if (typeof setthursdaydisabled === "function" && thursdaydisabled === true) setthursdaydisabled(false)
-        if (typeof setfridaydisabled === "function" && fridaydisabled === true) setfridaydisabled(false)
-        if (typeof setsaturdaydisabled === "function" && saturdaydisabled === true) setsaturdaydisabled(false)
-        if (typeof setsundaydisabled === "function" && sundaydisabled === true) setsundaydisabled(false)
-    }
-
-    const updatedisabledoptionsfalse = (day: {day: string}) => {
-        if (day.day !== 'monday' && typeof mondaydisabled === "boolean" && typeof setmondaydisabled === "function"){
-            setmondaydisabled(true)
-        } if (day.day !== 'tuesday' && typeof tuesdaydisabled === "boolean" && typeof settuesdaydisabled === "function"){
-            settuesdaydisabled(true)
-        } if (day.day !== 'wednesday' && typeof wednesdaydisabled === "boolean" && typeof setwednesdaydisabled === "function"){
-            setwednesdaydisabled(true)
-        } if (day.day !== 'thursday' && typeof thursdaydisabled === "boolean" && typeof setthursdaydisabled === "function"){
-            setthursdaydisabled(true)
-        } if (day.day !== 'friday' && typeof fridaydisabled === "boolean" && typeof setfridaydisabled === "function"){
-            setfridaydisabled(true)
-        } if (day.day !== 'saturday' && typeof saturdaydisabled === "boolean" && typeof setsaturdaydisabled === "function"){
-            setsaturdaydisabled(true)
-        } if (day.day !== 'sunday' && typeof sundaydisabled === "boolean" && typeof setsundaydisabled === "function"){
-            setsundaydisabled(true)
-        }
-    }
-
-    const updatedisabledoptionstrue = (day: {day: string}) => {
-        if (day.day === 'monday' && typeof mondaydisabled === "boolean" && typeof setmondaydisabled === "function"){
-            setmondaydisabled(false)
-        } if (day.day === 'tuesday' && typeof tuesdaydisabled === "boolean" && typeof settuesdaydisabled === "function"){
-            settuesdaydisabled(false)
-        } if (day.day === 'wednesday' && typeof wednesdaydisabled === "boolean" && typeof setwednesdaydisabled === "function"){
-            setwednesdaydisabled(false)
-        } if (day.day === 'thursday' && typeof thursdaydisabled === "boolean" && typeof setthursdaydisabled === "function"){
-            setthursdaydisabled(false)
-        } if (day.day === 'friday' && typeof fridaydisabled === "boolean" && typeof setfridaydisabled === "function"){
-            setfridaydisabled(false)
-        } if (day.day === 'saturday' && typeof saturdaydisabled === "boolean" && typeof setsaturdaydisabled === "function"){
-            setsaturdaydisabled(false)
-        } if (day.day === 'sunday' && typeof sundaydisabled === "boolean" && typeof setsundaydisabled === "function"){
-            setsundaydisabled(false)
-        } 
-    }
-
     const orderpaperdisplay = (
         <>
             <input placeholder="paper name" onChange={handleupdatepapername}/><br/>
-            <div>
-                <input disabled={typeof mondaydisabled === "boolean" && mondaydisabled} onChange={() => handleupdatedaystodeliver(monday, setmonday)} type="checkbox" checked={typeof monday === "boolean" && monday}/>monday
-            </div>
-            <div>
-                <input disabled={typeof tuesdaydisabled === "boolean" && tuesdaydisabled} onChange={() => handleupdatedaystodeliver(tuesday, settuesday)} type="checkbox" checked={typeof tuesday === "boolean" && tuesday}/>tuesday
-            </div>
-            <div>
-                <input disabled={typeof wednesdaydisabled === "boolean" && wednesdaydisabled} onChange={() => handleupdatedaystodeliver(wednesday, setwednesday)} type="checkbox" checked={typeof wednesday === "boolean" && wednesday}/>wednesday
-            </div>
-            <div>
-                <input disabled={typeof thursdaydisabled === "boolean" && thursdaydisabled} onChange={() => handleupdatedaystodeliver(thursday, setthursday)} type="checkbox" checked={typeof thursday === "boolean" && thursday}/>thursday
-            </div>
-            <div>
-                <input disabled={typeof fridaydisabled === "boolean" && fridaydisabled} onChange={() => handleupdatedaystodeliver(friday, setfriday)} type="checkbox" checked={typeof friday === "boolean" && friday}/>friday
-            </div>
-            <div>
-                <input disabled={typeof saturdaydisabled === "boolean" && saturdaydisabled} onChange={() => handleupdatedaystodeliver(saturday, setsaturday)} type="checkbox" checked={typeof saturday === "boolean" && saturday}/>saturday
-            </div>
-            <div>
-                <input disabled={typeof sundaydisabled === "boolean" && sundaydisabled} onChange={() => handleupdatedaystodeliver(sunday, setsunday)} type="checkbox" checked={typeof sunday === "boolean" && sunday}/>sunday
-            </div>
+            {daystates.map((day: any, index: number) => <div key={index}>
+                <input disabled={daystatesdisabled[index][0]} onChange={() => handleupdatedaystodeliver(day[0], day[1])} type="checkbox" checked={day[0]}/>{day[2]}
+            </div>)}
             <button onClick={handleorderpaper}>Confirm</button>
         </>
     )
